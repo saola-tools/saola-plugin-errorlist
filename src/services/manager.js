@@ -8,6 +8,8 @@ function Manager({ sandboxConfig, loggingFactory }) {
   const T = loggingFactory.getTracer();
 
   const errorBuilders = {};
+  let refByUniqueName;
+  let refByReturnCode;
 
   this.register = function (namespace, { errorCodes } = {}) {
     const errorExtensions = lodash.get(sandboxConfig.extensions, namespace);
@@ -36,6 +38,16 @@ function Manager({ sandboxConfig, loggingFactory }) {
       return null;
     }
     return errorBuilder.getDescriptor();
+  }
+
+  this.findByUniqueName = function (uniqueName) {
+    refByUniqueName = refByUniqueName || keyByUniqueName({ errorBuilders });
+    return transformInfos(refByUniqueName[uniqueName]);
+  }
+
+  this.findByReturnCode = function (returnCode) {
+    refByReturnCode = refByReturnCode || keyByReturnCode({ errorBuilders });
+    return transformInfos(refByReturnCode[returnCode]);
   }
 };
 
@@ -74,4 +86,36 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
   this.getDescriptor = function () {
     return { errorCodes, defaultLanguage };
   }
+}
+
+function keyByUniqueName ({ errorBuilders } = {}) {
+  const refs = {};
+  lodash.forOwn(errorBuilders, function(builder, namespace) {
+    const descriptor = builder.getDescriptor();
+    lodash.forOwn(descriptor.errorCodes, function(errorCode, uniqueName) {
+      refs[uniqueName] = refs[uniqueName] || [];
+      refs[uniqueName].push({ namespace, name: uniqueName, errorCode });
+    });
+  })
+  return refs;
+}
+
+function keyByReturnCode ({ errorBuilders } = {}) {
+  const refs = {};
+  lodash.forOwn(errorBuilders, function(builder, namespace) {
+    const descriptor = builder.getDescriptor();
+    lodash.forOwn(descriptor.errorCodes, function(errorCode, name) {
+      const returnCode = errorCode.returnCode || '__unknown__';
+      refs[returnCode] = refs[returnCode] || [];
+      refs[returnCode].push({ namespace, name, errorCode });
+    });
+  })
+  return refs;
+}
+
+function transformInfos (infos = []) {
+  return lodash.map(infos, function(info) {
+    const { namespace, name, errorCode } = info || {};
+    return lodash.assign({ namespace, name }, errorCode);
+  })
 }
