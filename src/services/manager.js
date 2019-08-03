@@ -12,23 +12,39 @@ function Manager({ sandboxConfig, loggingFactory }) {
   const errorBuilders = {};
 
   this.register = function (namespace, { errorCodes } = {}) {
-    if (lodash.isFunction(chores.newErrorBuilder)) {
-      errorBuilders[namespace] = chores.newErrorBuilder({ errorCodes });
-    } else {
-      errorBuilders[namespace] = new ErrorBuilder({ errorCodes });
+    L.has('info') && L.log('info', T.add({
+      namespace: namespace,
+      errorNames: Object.keys(errorCodes),
+    }).toMessage({
+      tmpl: 'Register the errorCodes for bundle[${namespace}]: ${errorNames}'
+    }));
+    const errorExtensions = lodash.get(sandboxConfig.extensions, namespace);
+    if (!lodash.isEmpty(errorExtensions)) {
+      errorCodes = lodash.merge(errorCodes, errorExtensions);
     }
+    const opts = { errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
+    errorBuilders[namespace] = new ErrorBuilder(opts);
     return errorBuilders[namespace];
   }
 
   this.getErrorBuilder = function (namespace) {
     return errorBuilders[namespace];
   }
+
+  this.getDescriptorOf = function (namespace) {
+    const errorBuilder = this.getErrorBuilder();
+    if (!errorBuilder) {
+      return null;
+    }
+    return errorBuilder.getDescriptor();
+  }
 };
 
 module.exports = Manager;
 
-function ErrorBuilder ({ errorCodes }) {
+function ErrorBuilder ({ errorCodes, defaultLanguage }) {
   this.newError = function(errorName, { payload, language } = {}) {
+    language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
     if (errInfo == null) {
       const err = new Error('Error[' + errorName + '] unsupported');
@@ -54,5 +70,9 @@ function ErrorBuilder ({ errorCodes }) {
       err.payload = payload;
     }
     return err;
+  }
+
+  this.getDescriptor = function () {
+    return { errorCodes, defaultLanguage };
   }
 }
