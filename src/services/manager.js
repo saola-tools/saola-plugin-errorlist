@@ -1,6 +1,7 @@
 'use strict';
 
 const Devebot = require('devebot');
+const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
 
 function Manager({ sandboxConfig, loggingFactory }) {
@@ -69,7 +70,7 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
       msg = errInfo.messageIn[language] || msg;
     }
     if (payload && typeof payload === 'object') {
-      msg = format(msg, payload);
+      msg = chores.formatTemplate(msg, payload);
     } else {
       payload = null;
     }

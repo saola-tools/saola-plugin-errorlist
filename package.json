@@ -1,6 +1,6 @@
 {
   "name": "app-errorlist",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Devebot error pool layerware",
   "homepage": "https://github.com/apporo/app-exception.git",
   "author": {
