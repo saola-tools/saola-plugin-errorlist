@@ -1,6 +1,6 @@
 module.exports = {
   devebot: {
-    mode: 'silent'
+    mode: 'tictac'
   },
   logger: {
     transports: {

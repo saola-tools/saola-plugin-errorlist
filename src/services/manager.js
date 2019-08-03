@@ -9,7 +9,7 @@ function Manager({ sandboxConfig, loggingFactory }) {
   const T = loggingFactory.getTracer();
 
   const errorBuilders = {};
-  let refByUniqueName;
+  let refByErrorClass;
   let refByReturnCode;
 
   this.register = function (namespace, { errorCodes } = {}) {
@@ -49,9 +49,9 @@ function Manager({ sandboxConfig, loggingFactory }) {
     return descriptors;
   }
 
-  this.findByUniqueName = function (uniqueName) {
-    refByUniqueName = refByUniqueName || keyByUniqueName({ errorBuilders });
-    return transformInfos(refByUniqueName[uniqueName]);
+  this.findByErrorClass = function (errorClass) {
+    refByErrorClass = refByErrorClass || keyByErrorClass({ errorBuilders });
+    return transformInfos(refByErrorClass[errorClass]);
   }
 
   this.findByReturnCode = function (returnCode) {
@@ -97,13 +97,13 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
   }
 }
 
-function keyByUniqueName ({ errorBuilders } = {}) {
+function keyByErrorClass ({ errorBuilders } = {}) {
   const refs = {};
   lodash.forOwn(errorBuilders, function(builder, namespace) {
     const descriptor = builder.getDescriptor();
-    lodash.forOwn(descriptor.errorCodes, function(errorCode, uniqueName) {
-      refs[uniqueName] = refs[uniqueName] || [];
-      refs[uniqueName].push({ namespace, name: uniqueName, errorCode });
+    lodash.forOwn(descriptor.errorCodes, function(errorCode, errorClass) {
+      refs[errorClass] = refs[errorClass] || [];
+      refs[errorClass].push({ namespace, name: errorClass, errorCode });
     });
   });
   return refs;
