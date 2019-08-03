@@ -41,6 +41,14 @@ function Manager({ sandboxConfig, loggingFactory }) {
     return errorBuilder.getDescriptor();
   }
 
+  this.getAllDescriptors = function () {
+    const descriptors = {};
+    lodash.forOwn(errorBuilders, function(errorBuilder, namespace) {
+      descriptors[namespace] = errorBuilder.getDescriptor();
+    });
+    return descriptors;
+  }
+
   this.findByUniqueName = function (uniqueName) {
     refByUniqueName = refByUniqueName || keyByUniqueName({ errorBuilders });
     return transformInfos(refByUniqueName[uniqueName]);
@@ -97,7 +105,7 @@ function keyByUniqueName ({ errorBuilders } = {}) {
       refs[uniqueName] = refs[uniqueName] || [];
       refs[uniqueName].push({ namespace, name: uniqueName, errorCode });
     });
-  })
+  });
   return refs;
 }
 
@@ -110,7 +118,7 @@ function keyByReturnCode ({ errorBuilders } = {}) {
       refs[returnCode] = refs[returnCode] || [];
       refs[returnCode].push({ namespace, name, errorCode });
     });
-  })
+  });
   return refs;
 }
 
