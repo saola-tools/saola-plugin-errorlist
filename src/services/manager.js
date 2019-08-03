@@ -1,8 +1,6 @@
 'use strict';
 
 const Devebot = require('devebot');
-const Promise = Devebot.require('bluebird');
-const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
 
 function Manager({ sandboxConfig, loggingFactory }) {
@@ -12,17 +10,18 @@ function Manager({ sandboxConfig, loggingFactory }) {
   const errorBuilders = {};
 
   this.register = function (namespace, { errorCodes } = {}) {
-    L.has('info') && L.log('info', T.add({
-      namespace: namespace,
-      errorNames: Object.keys(errorCodes),
-    }).toMessage({
-      tmpl: 'Register the errorCodes for bundle[${namespace}]: ${errorNames}'
-    }));
     const errorExtensions = lodash.get(sandboxConfig.extensions, namespace);
     if (!lodash.isEmpty(errorExtensions)) {
       errorCodes = lodash.merge(errorCodes, errorExtensions);
     }
     const opts = { errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
+    L.has('debug') && L.log('debug', T.add({
+      namespace: namespace,
+      errorNames: Object.keys(errorCodes),
+      extensions: Object.keys(errorExtensions || {})
+    }).toMessage({
+      tmpl: 'Register the errorCodes for the bundle[${namespace}]: ${errorNames} < ${extensions}'
+    }));
     errorBuilders[namespace] = new ErrorBuilder(opts);
     return errorBuilders[namespace];
   }
@@ -32,7 +31,7 @@ function Manager({ sandboxConfig, loggingFactory }) {
   }
 
   this.getDescriptorOf = function (namespace) {
-    const errorBuilder = this.getErrorBuilder();
+    const errorBuilder = errorBuilders[namespace]; //this.getErrorBuilder();
     if (!errorBuilder) {
       return null;
     }
