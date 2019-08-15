@@ -25,7 +25,17 @@ function Manager({ sandboxConfig, loggingFactory }) {
     }).toMessage({
       tmpl: 'Register the errorCodes for the bundle[${namespace}]: ${errorNames} < ${extensions}'
     }));
-    errorBuilders[namespace] = new ErrorBuilder(opts);
+    if (lodash.isFunction(chores.newErrorBuilder)) {
+      L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
+        tmpl: 'Register the errorCodes for the bundle[${namespace}] with builtin ErrorBuilder class'
+      }));
+      errorBuilders[namespace] = chores.newErrorBuilder(opts);
+    } else {
+      L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
+        tmpl: 'Register the errorCodes for the bundle[${namespace}] with native ErrorBuilder class'
+      }));
+      errorBuilders[namespace] = new ErrorBuilder(opts);
+    }
     return errorBuilders[namespace];
   }
 
@@ -62,16 +72,26 @@ function Manager({ sandboxConfig, loggingFactory }) {
 
 module.exports = Manager;
 
+function newError (errorName, message, opts = {}) {
+  const err = new Error(message);
+  err.name = errorName;
+  for (const fieldName in opts) {
+    if (opts[fieldName] !== undefined) {
+      err[fieldName] = opts[fieldName];
+    }
+  }
+  return err;
+}
+
 function ErrorBuilder ({ errorCodes, defaultLanguage }) {
   this.newError = function(errorName, { payload, language } = {}) {
     language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
     if (errInfo == null) {
-      const err = new Error('Error[' + errorName + '] unsupported');
-      err.name = errorName;
-      err.returnCode = -1;
-      err.statusCode = 500;
-      return err;
+      return newError(errorName, 'Error[' + errorName + '] unsupported', {
+        returnCode: -1,
+        statusCode: 500
+      });
     }
     let msg = errInfo.message || errorName;
     if (errInfo.messageIn && typeof language === 'string') {
@@ -82,14 +102,11 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
     } else {
       payload = null;
     }
-    const err = new Error(msg);
-    err.name = errorName;
-    err.returnCode = errInfo.returnCode;
-    err.statusCode = errInfo.statusCode;
-    if (payload) {
-      err.payload = payload;
-    }
-    return err;
+    return newError(errorName, msg, {
+      returnCode: errInfo.returnCode,
+      statusCode: errInfo.statusCode,
+      payload: payload
+    });
   }
 
   this.getDescriptor = function () {
