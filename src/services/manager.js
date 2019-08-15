@@ -25,14 +25,14 @@ function Manager({ sandboxConfig, loggingFactory }) {
     }).toMessage({
       tmpl: 'Register the errorCodes for the bundle[${namespace}]: ${errorNames} < ${extensions}'
     }));
-    if (lodash.isFunction(chores.newErrorBuilder)) {
+    if (sandboxConfig.useBuiltinBuilder === false && lodash.isFunction(chores.newErrorBuilder)) {
       L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
-        tmpl: 'Register the errorCodes for the bundle[${namespace}] with builtin ErrorBuilder class'
+        tmpl: 'Register the errorCodes for the bundle[${namespace}] with devebot ErrorBuilder class'
       }));
       errorBuilders[namespace] = chores.newErrorBuilder(opts);
     } else {
       L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
-        tmpl: 'Register the errorCodes for the bundle[${namespace}] with native ErrorBuilder class'
+        tmpl: 'Register the errorCodes for the bundle[${namespace}] with builtin ErrorBuilder class'
       }));
       errorBuilders[namespace] = new ErrorBuilder(opts);
     }
@@ -44,7 +44,7 @@ function Manager({ sandboxConfig, loggingFactory }) {
   }
 
   this.getDescriptorOf = function (namespace) {
-    const errorBuilder = errorBuilders[namespace]; //this.getErrorBuilder();
+    const errorBuilder = this.getErrorBuilder();
     if (!errorBuilder) {
       return null;
     }
