@@ -1,6 +1,6 @@
 {
   "name": "app-errorlist",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Devebot error pool layerware",
   "license": "MIT",
   "homepage": "https://github.com/apporo/app-errorlist.git",
