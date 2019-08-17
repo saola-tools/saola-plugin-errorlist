@@ -11,7 +11,7 @@ describe('manager', function() {
     var ctx = {
       L: loggingFactory.getLogger(),
       T: loggingFactory.getTracer(),
-      blockRef: 'app-errorlist',
+      packageName: 'app-errorlist',
     }
 
     var Manager, newError;
@@ -42,6 +42,22 @@ describe('manager', function() {
       });
       assert.isTrue('empty' in err);
       assert.isFalse('unknown' in err);
+    });
+  });
+
+  describe('ErrorBuilder', function() {
+    var loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
+    var ctx = {
+      L: loggingFactory.getLogger(),
+      T: loggingFactory.getTracer(),
+      packageName: 'app-errorlist',
+    }
+
+    var Manager, ErrorBuilder;
+
+    beforeEach(function() {
+      Manager = dtk.acquire('manager');
+      ErrorBuilder = dtk.get(Manager, 'ErrorBuilder');
     });
   });
 });

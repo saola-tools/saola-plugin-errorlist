@@ -3,6 +3,7 @@
 const Devebot = require('devebot');
 const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
+const misc = require('../supports/misc');
 
 function Manager({ sandboxConfig, loggingFactory }) {
   const L = loggingFactory.getLogger();
@@ -12,39 +13,39 @@ function Manager({ sandboxConfig, loggingFactory }) {
   let refByErrorClass;
   let refByReturnCode;
 
-  this.register = function (namespace, { errorCodes } = {}) {
-    const errorExtensions = lodash.get(sandboxConfig.extensions, namespace);
+  this.register = function (packageName, { errorCodes } = {}) {
+    const errorExtensions = lodash.get(sandboxConfig.extensions, packageName);
     if (!lodash.isEmpty(errorExtensions)) {
       errorCodes = lodash.merge(errorCodes, errorExtensions);
     }
-    const opts = { errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
+    const opts = { packageName, errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
     L.has('debug') && L.log('debug', T.add({
-      namespace: namespace,
+      packageName: packageName,
       errorNames: Object.keys(errorCodes),
       extensions: Object.keys(errorExtensions || {})
     }).toMessage({
-      tmpl: 'Register the errorCodes for the bundle[${namespace}]: ${errorNames} < ${extensions}'
+      tmpl: 'Register the errorCodes for the bundle[${packageName}]: ${errorNames} < ${extensions}'
     }));
     if (sandboxConfig.useBuiltinBuilder === false && lodash.isFunction(chores.newErrorBuilder)) {
-      L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
-        tmpl: 'Register the errorCodes for the bundle[${namespace}] with devebot ErrorBuilder class'
+      L.has('silly') && L.log('silly', T.add({ packageName }).toMessage({
+        tmpl: 'Register the errorCodes for the bundle[${packageName}] with devebot ErrorBuilder class'
       }));
-      errorBuilders[namespace] = chores.newErrorBuilder(opts);
+      errorBuilders[packageName] = chores.newErrorBuilder(opts);
     } else {
-      L.has('silly') && L.log('silly', T.add({ namespace }).toMessage({
-        tmpl: 'Register the errorCodes for the bundle[${namespace}] with builtin ErrorBuilder class'
+      L.has('silly') && L.log('silly', T.add({ packageName }).toMessage({
+        tmpl: 'Register the errorCodes for the bundle[${packageName}] with builtin ErrorBuilder class'
       }));
-      errorBuilders[namespace] = new ErrorBuilder(opts);
+      errorBuilders[packageName] = new ErrorBuilder(opts);
     }
-    return errorBuilders[namespace];
+    return errorBuilders[packageName];
   }
 
-  this.getErrorBuilder = function (namespace) {
-    return errorBuilders[namespace];
+  this.getErrorBuilder = function (packageName) {
+    return errorBuilders[packageName];
   }
 
-  this.getDescriptorOf = function (namespace) {
-    const errorBuilder = this.getErrorBuilder();
+  this.getDescriptorOf = function (packageName) {
+    const errorBuilder = this.getErrorBuilder(packageName);
     if (!errorBuilder) {
       return null;
     }
@@ -53,8 +54,8 @@ function Manager({ sandboxConfig, loggingFactory }) {
 
   this.getAllDescriptors = function () {
     const descriptors = {};
-    lodash.forOwn(errorBuilders, function(errorBuilder, namespace) {
-      descriptors[namespace] = errorBuilder.getDescriptor();
+    lodash.forOwn(errorBuilders, function(errorBuilder, packageName) {
+      descriptors[packageName] = errorBuilder.getDescriptor();
     });
     return descriptors;
   }
@@ -83,12 +84,15 @@ function newError (errorName, message, opts = {}) {
   return err;
 }
 
-function ErrorBuilder ({ errorCodes, defaultLanguage }) {
+function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
+  const packageRef = misc.getPackageRef(packageName);
+
   this.newError = function(errorName, { payload, language } = {}) {
     language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
     if (errInfo == null) {
       return newError(errorName, 'Error[' + errorName + '] unsupported', {
+        packageRef,
         returnCode: -1,
         statusCode: 500
       });
@@ -103,6 +107,7 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
       payload = null;
     }
     return newError(errorName, msg, {
+      packageRef,
       returnCode: errInfo.returnCode,
       statusCode: errInfo.statusCode,
       payload: payload
@@ -110,17 +115,19 @@ function ErrorBuilder ({ errorCodes, defaultLanguage }) {
   }
 
   this.getDescriptor = function () {
-    return { errorCodes, defaultLanguage };
+    return { packageRef, errorCodes, defaultLanguage };
   }
 }
 
 function keyByErrorClass ({ errorBuilders } = {}) {
   const refs = {};
-  lodash.forOwn(errorBuilders, function(builder, namespace) {
+  lodash.forOwn(errorBuilders, function(builder, packageName) {
     const descriptor = builder.getDescriptor();
     lodash.forOwn(descriptor.errorCodes, function(errorCode, errorClass) {
       refs[errorClass] = refs[errorClass] || [];
-      refs[errorClass].push({ namespace, name: errorClass, errorCode });
+      refs[errorClass].push({
+        packageName, name: errorClass, errorCode, packageRef: descriptor.packageRef
+      });
     });
   });
   return refs;
@@ -128,20 +135,21 @@ function keyByErrorClass ({ errorBuilders } = {}) {
 
 function keyByReturnCode ({ errorBuilders } = {}) {
   const refs = {};
-  lodash.forOwn(errorBuilders, function(builder, namespace) {
+  lodash.forOwn(errorBuilders, function(builder, packageName) {
     const descriptor = builder.getDescriptor();
     lodash.forOwn(descriptor.errorCodes, function(errorCode, name) {
       const returnCode = errorCode.returnCode || '__unknown__';
       refs[returnCode] = refs[returnCode] || [];
-      refs[returnCode].push({ namespace, name, errorCode });
+      refs[returnCode].push({
+        packageName, name, errorCode, packageRef: descriptor.packageRef
+      });
     });
   });
   return refs;
 }
 
 function transformInfos (infos = []) {
-  return lodash.map(infos, function(info) {
-    const { namespace, name, errorCode } = info || {};
-    return lodash.assign({ namespace, name }, errorCode);
+  return lodash.map(infos, function(info = {}) {
+    return lodash.assign(lodash.omit(info, ['errorCode']), info.errorCode);
   })
 }
