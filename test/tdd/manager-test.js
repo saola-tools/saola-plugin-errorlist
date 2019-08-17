@@ -59,5 +59,40 @@ describe('manager', function() {
       Manager = dtk.acquire('manager');
       ErrorBuilder = dtk.get(Manager, 'ErrorBuilder');
     });
+
+    it('must embed [packageRef, returnCode] fields to the error object', function() {
+      var builder = new ErrorBuilder({
+        packageName: 'app-restfront',
+        errorCodes: {
+          UserNotFound: {
+            message: 'User not found',
+            returnCode: 1000,
+            statusCode: 400
+          },
+          UserIsLocked: {
+            message: 'User is locked',
+            returnCode: 1001,
+            statusCode: 400
+          },
+        }
+      });
+
+      var err = builder.newError('UserNotFound', {
+        payload: {
+          email: 'user@example.com',
+          password: '********'
+        }
+      });
+
+      assert.equal(err.name, 'UserNotFound');
+      assert.equal(err.message, 'User not found');
+      assert.equal(err.statusCode, 400);
+      assert.equal(err.returnCode, 1000);
+      assert.equal(err.packageRef, 'A6+4vsPnaKIsWdzGkPE1IyK4FmE=');
+      assert.deepEqual(err.payload, {
+        email: 'user@example.com',
+        password: '********'
+      });
+    });
   });
 });
