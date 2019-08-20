@@ -3,6 +3,7 @@
 const Devebot = require('devebot');
 const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
+const util = require('util');
 const misc = require('../supports/misc');
 
 function Manager({ sandboxConfig, loggingFactory }) {
@@ -69,19 +70,35 @@ function Manager({ sandboxConfig, loggingFactory }) {
     refByReturnCode = refByReturnCode || keyByReturnCode({ errorBuilders });
     return transformInfos(refByReturnCode[returnCode]);
   }
+
+  Object.defineProperty(this, 'BusinessError', {
+    get: function () {
+      return BusinessError;
+    },
+    set: function (val) {}
+  });
 };
 
 module.exports = Manager;
 
-function newError (errorName, message, opts = {}) {
-  const err = new Error(message);
-  err.name = errorName;
+function BusinessError(name, message, opts = {}) {
+  Error.call(this, message);
+  this.name = name;
+  this.message = message;
   for (const fieldName in opts) {
     if (opts[fieldName] !== undefined) {
-      err[fieldName] = opts[fieldName];
+      this[fieldName] = opts[fieldName];
     }
   }
-  return err;
+  const oldLimit = Error.stackTraceLimit;
+  Error.stackTraceLimit = 64;
+  Error.captureStackTrace(this, this.constructor);
+  Error.stackTraceLimit = oldLimit;
+}
+util.inherits(BusinessError, Error);
+
+function newError (errorName, message, opts = {}) {
+  return new BusinessError(errorName, message, opts);
 }
 
 function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
