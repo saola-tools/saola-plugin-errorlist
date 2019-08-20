@@ -14,11 +14,20 @@ describe('manager', function() {
       packageName: 'app-errorlist',
     }
 
-    var Manager, newError;
+    var Manager, BusinessError, newError;
 
     beforeEach(function() {
       Manager = dtk.acquire('manager');
+      BusinessError = dtk.get(Manager, 'BusinessError');
       newError = dtk.get(Manager, 'newError');
+    });
+
+    it('newError() must return an instance of BusinessError class', function() {
+      var err = newError('UserNotFound', 'username must be provided', {
+        returnCode: 1000,
+        statusCode: 500
+      });
+      assert.instanceOf(err, BusinessError);
     });
 
     it('newError() must build the error with provided attributes correctly', function() {
