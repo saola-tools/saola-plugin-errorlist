@@ -3,7 +3,7 @@
 const Devebot = require('devebot');
 const chores = Devebot.require('chores');
 const lodash = Devebot.require('lodash');
-const util = require('util');
+const BusinessError = require('../supports/business-error');
 const misc = require('../supports/misc');
 
 function Manager({ sandboxConfig, loggingFactory }) {
@@ -80,22 +80,6 @@ function Manager({ sandboxConfig, loggingFactory }) {
 };
 
 module.exports = Manager;
-
-function BusinessError(name, message, opts = {}) {
-  Error.call(this, message);
-  this.name = name;
-  this.message = message;
-  for (const fieldName in opts) {
-    if (opts[fieldName] !== undefined) {
-      this[fieldName] = opts[fieldName];
-    }
-  }
-  const oldLimit = Error.stackTraceLimit;
-  Error.stackTraceLimit = 64;
-  Error.captureStackTrace(this, this.constructor);
-  Error.stackTraceLimit = oldLimit;
-}
-util.inherits(BusinessError, Error);
 
 function newError (errorName, message, opts = {}) {
   return new BusinessError(errorName, message, opts);
