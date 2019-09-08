@@ -88,6 +88,8 @@ function newError (errorName, message, opts = {}) {
 function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
   const packageRef = misc.getPackageRef(packageName);
 
+  errorCodes = errorCodes || {};
+
   this.newError = function(errorName, { payload, language } = {}) {
     language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
