@@ -14,12 +14,12 @@ function Manager({ sandboxConfig, loggingFactory }) {
   let refByErrorClass;
   let refByReturnCode;
 
-  this.register = function (packageName, { errorCodes } = {}) {
+  this.register = function (packageName, { errorConstructor, errorCodes } = {}) {
     const errorExtensions = lodash.get(sandboxConfig.extensions, packageName);
     if (!lodash.isEmpty(errorExtensions)) {
       errorCodes = lodash.merge(errorCodes, errorExtensions);
     }
-    const opts = { packageName, errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
+    const opts = { packageName, errorConstructor, errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
     L.has('debug') && L.log('debug', T.add({
       packageName: packageName,
       errorNames: Object.keys(errorCodes),
@@ -85,19 +85,23 @@ function newError (errorName, message, opts = {}) {
   return new BusinessError(errorName, message, opts);
 }
 
-function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
+function ErrorBuilder ({ packageName, errorConstructor, errorCodes, defaultLanguage }) {
   const packageRef = misc.getPackageRef(packageName);
 
+  if (!(typeof errorConstructor === 'function' && errorConstructor.prototype instanceof Error)) {
+    errorConstructor = BusinessError;
+  }
   errorCodes = errorCodes || {};
 
   this.newError = function(errorName, { payload, language } = {}) {
     language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
     if (errInfo == null) {
-      return newError(errorName, 'Error[' + errorName + '] unsupported', {
+      return new errorConstructor(errorName, 'Error[' + errorName + '] unsupported', {
         packageRef,
         returnCode: -1,
-        statusCode: 500
+        statusCode: 500,
+        payload: payload
       });
     }
     let msg = errInfo.message || errorName;
@@ -109,7 +113,7 @@ function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
     } else {
       payload = null;
     }
-    return newError(errorName, msg, {
+    return new errorConstructor(errorName, msg, {
       packageRef,
       returnCode: errInfo.returnCode,
       statusCode: errInfo.statusCode,
@@ -118,7 +122,7 @@ function ErrorBuilder ({ packageName, errorCodes, defaultLanguage }) {
   }
 
   this.getDescriptor = function () {
-    return { packageRef, errorCodes, defaultLanguage };
+    return { packageRef, errorConstructor, errorCodes, defaultLanguage };
   }
 }
 
