@@ -1,20 +1,20 @@
 'use strict';
 
-var devebot = require('devebot');
-var lodash = devebot.require('lodash');
-var assert = require('liberica').assert;
-var dtk = require('liberica').mockit;
+const devebot = require('devebot');
+const lodash = devebot.require('lodash');
+const assert = require('liberica').assert;
+const dtk = require('liberica').mockit;
 
 describe('manager', function() {
   describe('newError()', function() {
-    var loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
-    var ctx = {
+    const loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
+    const ctx = {
       L: loggingFactory.getLogger(),
       T: loggingFactory.getTracer(),
       packageName: 'app-errorlist',
     }
 
-    var Manager, BusinessError, newError;
+    let Manager, BusinessError, newError;
 
     beforeEach(function() {
       Manager = dtk.acquire('manager');
@@ -23,7 +23,7 @@ describe('manager', function() {
     });
 
     it('newError() must return an instance of BusinessError class', function() {
-      var err = newError('UserNotFound', 'username must be provided', {
+      const err = newError('UserNotFound', 'username must be provided', {
         returnCode: 1000,
         statusCode: 500
       });
@@ -31,7 +31,7 @@ describe('manager', function() {
     });
 
     it('newError() must build the error with provided attributes correctly', function() {
-      var err = newError('UserNotFound', 'username must be provided', {
+      const err = newError('UserNotFound', 'username must be provided', {
         unknown: undefined,
         empty: null,
         returnCode: 1000,
@@ -55,14 +55,14 @@ describe('manager', function() {
   });
 
   describe('ErrorBuilder', function() {
-    var loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
-    var ctx = {
+    const loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
+    const ctx = {
       L: loggingFactory.getLogger(),
       T: loggingFactory.getTracer(),
       packageName: 'app-errorlist',
     }
 
-    var Manager, ErrorBuilder;
+    let Manager, ErrorBuilder;
 
     beforeEach(function() {
       Manager = dtk.acquire('manager');
@@ -70,7 +70,7 @@ describe('manager', function() {
     });
 
     it('must embed [packageRef, returnCode] fields to the error object', function() {
-      var builder = new ErrorBuilder({
+      const builder = new ErrorBuilder({
         packageName: 'app-restfront',
         errorCodes: {
           UserNotFound: {
@@ -86,7 +86,7 @@ describe('manager', function() {
         }
       });
 
-      var err = builder.newError('UserNotFound', {
+      const err = builder.newError('UserNotFound', {
         payload: {
           email: 'user@example.com',
           password: '********'
