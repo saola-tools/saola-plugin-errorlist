@@ -1,0 +1,6 @@
+= Tổng quan
+
+`Errorlist` là một thành phần cắm thêm (plugin) của Devebot Platform.
+Mục đích của `Errorlist` là định nghĩa các đối tượng lỗi (Error) từ tệp cấu hình JSON, sau đó có thể sử dụng các cấu trúc lỗi này bên trong các đối tượng dịch vụ của các plugin.
+
+
