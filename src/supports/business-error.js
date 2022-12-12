@@ -1,8 +1,8 @@
-'use strict';
+"use strict";
 
-const util = require('util');
+const util = require("util");
 
-function BusinessError(name, message, opts = {}) {
+function BusinessError (name, message, opts = {}) {
   Error.call(this, message);
   this.name = name;
   this.message = message;
