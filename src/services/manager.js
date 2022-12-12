@@ -75,15 +75,11 @@ function Manager ({ sandboxConfig, loggingFactory }) {
     get: function () {
       return BusinessError;
     },
-    set: function (val) {}
+    set: function (_) {}
   });
 };
 
 module.exports = Manager;
-
-function newError (errorName, message, opts = {}) {
-  return new BusinessError(errorName, message, opts);
-}
 
 function ErrorBuilder ({ packageName, errorConstructor, errorCodes, defaultLanguage }) {
   const packageRef = misc.getPackageRef(packageName);

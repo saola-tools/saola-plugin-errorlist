@@ -3,23 +3,18 @@
 const devebot = require('devebot');
 const lodash = devebot.require('lodash');
 const assert = require('liberica').assert;
-const dtk = require('liberica').mockit;
+const mockit = require('liberica').mockit;
 
 describe('manager', function() {
   describe('newError()', function() {
-    const loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
-    const ctx = {
-      L: loggingFactory.getLogger(),
-      T: loggingFactory.getTracer(),
-      packageName: 'app-errorlist',
-    }
-
     let Manager, BusinessError, newError;
 
     beforeEach(function() {
-      Manager = dtk.acquire('manager');
-      BusinessError = dtk.get(Manager, 'BusinessError');
-      newError = dtk.get(Manager, 'newError');
+      Manager = mockit.acquire('manager', { libraryDir: '../lib' });
+      BusinessError = mockit.get(Manager, 'BusinessError');
+      newError = function newError (errorName, message, opts = {}) {
+        return new BusinessError(errorName, message, opts);
+      }
     });
 
     it('newError() must return an instance of BusinessError class', function() {
@@ -55,18 +50,11 @@ describe('manager', function() {
   });
 
   describe('ErrorBuilder', function() {
-    const loggingFactory = dtk.createLoggingFactoryMock({ captureMethodCall: false });
-    const ctx = {
-      L: loggingFactory.getLogger(),
-      T: loggingFactory.getTracer(),
-      packageName: 'app-errorlist',
-    }
-
     let Manager, ErrorBuilder;
 
     beforeEach(function() {
-      Manager = dtk.acquire('manager');
-      ErrorBuilder = dtk.get(Manager, 'ErrorBuilder');
+      Manager = mockit.acquire('manager', { libraryDir: '../lib' });
+      ErrorBuilder = mockit.get(Manager, 'ErrorBuilder');
     });
 
     it('must embed [packageRef, returnCode] fields to the error object', function() {
