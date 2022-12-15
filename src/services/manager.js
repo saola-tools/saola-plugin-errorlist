@@ -22,7 +22,7 @@ function Manager ({ sandboxConfig, loggingFactory }) {
     const opts = { packageName, errorConstructor, errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
     L.has("debug") && L.log("debug", T.add({
       packageName: packageName,
-      errorNames: Object.keys(errorCodes),
+      errorNames: Object.keys(errorCodes || {}),
       extensions: Object.keys(errorExtensions || {})
     }).toMessage({
       tmpl: "Register the errorCodes for the bundle[${packageName}]: ${errorNames} < ${extensions}"
