@@ -1,3 +1,3 @@
-# app-errorlist
+# @saola/plugin-errorlist
 
-> Devebot error dictionary layerware
+> Saola plugin for errors management

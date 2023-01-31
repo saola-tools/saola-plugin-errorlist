@@ -1,4 +1,4 @@
-# app-errorlist test/app
+# @saola/plugin-errorlist test/app
 
 ## Usage
 

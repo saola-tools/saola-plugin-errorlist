@@ -1,6 +1,6 @@
 "use strict";
 
-const Devebot = require("devebot");
+const Devebot = require("@saola/core");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
 const BusinessError = require("../supports/business-error");
@@ -20,7 +20,7 @@ function Manager ({ sandboxConfig, loggingFactory }) {
       errorCodes = lodash.merge(errorCodes, errorExtensions);
     }
     const opts = { packageName, errorConstructor, errorCodes, defaultLanguage: sandboxConfig.defaultLanguage };
-    L.has("debug") && L.log("debug", T.add({
+    L && L.has("debug") && L.log("debug", T && T.add({
       packageName: packageName,
       errorNames: Object.keys(errorCodes || {}),
       extensions: Object.keys(errorExtensions || {})
@@ -28,12 +28,12 @@ function Manager ({ sandboxConfig, loggingFactory }) {
       tmpl: "Register the errorCodes for the bundle[${packageName}]: ${errorNames} < ${extensions}"
     }));
     if (sandboxConfig.useBuiltinBuilder === false && lodash.isFunction(chores.newErrorBuilder)) {
-      L.has("silly") && L.log("silly", T.add({ packageName }).toMessage({
-        tmpl: "Register the errorCodes for the bundle[${packageName}] with devebot ErrorBuilder class"
+      L && L.has("silly") && L.log("silly", T && T.add({ packageName }).toMessage({
+        tmpl: "Register the errorCodes for the bundle[${packageName}] with general ErrorBuilder class"
       }));
       errorBuilders[packageName] = chores.newErrorBuilder(opts);
     } else {
-      L.has("silly") && L.log("silly", T.add({ packageName }).toMessage({
+      L && L.has("silly") && L.log("silly", T && T.add({ packageName }).toMessage({
         tmpl: "Register the errorCodes for the bundle[${packageName}] with builtin ErrorBuilder class"
       }));
       errorBuilders[packageName] = new ErrorBuilder(opts);

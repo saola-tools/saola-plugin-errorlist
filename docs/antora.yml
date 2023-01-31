@@ -1,5 +1,5 @@
-name: app-errorlist
-title: "Devebot Plugin: Errorlist"
+name: plugin-errorlist
+title: "Saola Plugin: Errorlist"
 version: master
 nav:
 - modules/ROOT/nav.adoc

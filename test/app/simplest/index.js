@@ -1,12 +1,12 @@
-'use strict';
+"use strict";
 
-const path = require('path');
+const path = require("path");
 
-const app = require('devebot').launchApplication({
+const app = require("@saola/core").launchApplication({
   appRootPath: __dirname
 }, [{
-  name: 'app-errorlist',
-  path: path.join(__dirname, '../../../index.js')
+  name: "@saola/plugin-errorlist",
+  path: path.join(__dirname, "../../../index.js")
 }]);
 
 if (require.main === module) app.server.start();
