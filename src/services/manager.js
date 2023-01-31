@@ -89,11 +89,13 @@ function ErrorBuilder ({ packageName, errorConstructor, errorCodes, defaultLangu
   }
   errorCodes = errorCodes || {};
 
+  const ErrorConstructor = errorConstructor;
+
   this.newError = function(errorName, { payload, language } = {}) {
     language = language || defaultLanguage;
     const errInfo = errorCodes[errorName];
     if (errInfo == null) {
-      return new errorConstructor(errorName, "Error[" + errorName + "] unsupported", {
+      return new ErrorConstructor(errorName, "Error[" + errorName + "] unsupported", {
         packageRef,
         returnCode: -1,
         statusCode: 500,
@@ -109,7 +111,7 @@ function ErrorBuilder ({ packageName, errorConstructor, errorCodes, defaultLangu
     } else {
       payload = null;
     }
-    return new errorConstructor(errorName, msg, {
+    return new ErrorConstructor(errorName, msg, {
       packageRef,
       returnCode: errInfo.returnCode,
       statusCode: errInfo.statusCode,
