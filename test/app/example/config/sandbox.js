@@ -19,7 +19,7 @@ module.exports = {
     pluginErrorlist: {
       defaultLanguage: "vi",
       extensions: {
-        "devebot-application": {
+        "saola-application": {
           // User
           UserNotFound: {
             messageIn: {

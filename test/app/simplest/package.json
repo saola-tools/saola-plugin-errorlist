@@ -1,7 +1,7 @@
 {
   "name": "app-example",
   "version": "0.1.0",
-  "description": "Devebot plugin example",
+  "description": "Saola Plugin errorlist example",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

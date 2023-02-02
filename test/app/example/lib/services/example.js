@@ -1,8 +1,6 @@
 "use strict";
 
-function Example (params) {
-  params = params || {};
-
+function Example (params = {}) {
   const packageName = params.packageName;
   const sandboxConfig = params.sandboxConfig;
   const L = params.loggingFactory.getLogger();
