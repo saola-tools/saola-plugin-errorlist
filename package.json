@@ -19,13 +19,14 @@
   ],
   "scripts": {
     "clean": "rm -rf ./lib",
-    "clean-modules": "rm -rf ./node_modules && rm ./package-lock.json",
-    "bootstrap": "npm install --ignore-scripts; cd test && npm install --ignore-scripts",
+    "clean-modules": "rm -rf ./node_modules ./package-lock.json ./test/node_modules ./test/package-lock.json",
+    "setup-modules": "npm install --ignore-scripts; npm --prefix=test install --ignore-scripts",
+    "reset-modules": "npm run clean-modules && npm run setup-modules",
     "build": "npm exec -- babel ./src -d ./lib",
-    "check": "npm exec -- eslint ./src index.js",
-    "check-silent": "npm exec -- eslint --quiet ./src index.js",
-    "pretest": "npm run check-silent && npm run clean && NODE_ENV=${SAOLA_NODE_ENV:-test} npm run build",
-    "testOnly": "cd test && npm exec -- mocha --recursive ./tdd/*-test.js ./bdd/*-test.js",
+    "check": "npm exec -- eslint config src index.js",
+    "check-silent": "npm exec -- eslint --quiet config src index.js",
+    "pretest": "npm run clean && NODE_ENV=${SAOLA_NODE_ENV:-test} npm run build",
+    "testOnly": "npm --prefix=test exec -- mocha --recursive ./test/tdd/*-test.js ./test/bdd/*-test.js",
     "test": "npm run testOnly",
     "prepublishOnly": "npm run check-silent && npm run clean && NODE_ENV=${SAOLA_NODE_ENV:-production} npm run build",
     "verify": "npm run prepublishOnly && npm run testOnly"
@@ -52,7 +53,6 @@
     "eslint-plugin-node": "^7.0.1",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-security": "^1.5.0",
-    "eslint-plugin-standard": "^4.0.0",
-    "@saola/dev": "^0.4.0"
+    "eslint-plugin-standard": "^4.0.0"
   }
 }

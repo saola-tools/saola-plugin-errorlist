@@ -7,7 +7,7 @@ const app = require("@saola/core").launchApplication({
 }, [
   {
     name: "@saola/plugin-errorlist",
-    path: path.join(__dirname, "../../../index.js")
+    path: path.join(__dirname, "../../../", "index.js")
   }
 ]);
 

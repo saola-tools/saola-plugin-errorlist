@@ -3,8 +3,8 @@
 const Devebot = require("@saola/core");
 const chores = Devebot.require("chores");
 const lodash = Devebot.require("lodash");
+
 const BusinessError = require("../supports/business-error");
-const misc = require("../supports/misc");
 
 function Manager ({ sandboxConfig, loggingFactory }) {
   const L = loggingFactory.getLogger();
@@ -82,7 +82,7 @@ function Manager ({ sandboxConfig, loggingFactory }) {
 module.exports = Manager;
 
 function ErrorBuilder ({ packageName, errorConstructor, errorCodes, defaultLanguage }) {
-  const packageRef = misc.getPackageRef(packageName);
+  const packageRef = chores.getHashDigest(packageName, { encoding: "base64" });
 
   if (!(typeof errorConstructor === "function" && errorConstructor.prototype instanceof Error)) {
     errorConstructor = BusinessError;
