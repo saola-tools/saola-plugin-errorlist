@@ -1,14 +1,10 @@
 {
   "name": "@saola/plugin-errorlist",
   "version": "0.4.1",
-  "description": "Saola plugin for errors management",
+  "description": "Saola Error-Codes Description plugin",
   "license": "MIT",
-  "homepage": "https://github.com/saolajs/saola-plugin-errorlist.git",
-  "author": {
-    "name": "SaolaJS",
-    "email": "contact@saolajs.com",
-    "url": "https://github.com/saolajs"
-  },
+  "homepage": "https://github.com/saola-tools/saola-plugin-errorlist",
+  "author": "Saola Development Team",
   "main": "index.js",
   "files": [
     "bin/",
